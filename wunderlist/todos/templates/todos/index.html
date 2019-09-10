@@ -1,0 +1,12 @@
+{% extends 'todos/base.html' %}
+
+{% block body %}
+<h1>인덱스</h1>
+{% for todo in todos  %}
+<li>{{ todo.title }} : {{ todo.due_date }} 
+  <a href="{% url 'todos:edit' todo.id %}">수정</a>
+  <a href="{% url 'todos:delete' todo.id %}">삭제</a>
+</li>
+
+{% endfor %}
+{% endblock %}
