@@ -10,7 +10,7 @@ def index(request):
     return render(request, 'todos/index.html', ctx)
 
 def create(request):
-    # new와 create를 통합
+    # new와 create를 통합  
     if request.method == 'POST':
         title = request.POST.get('title')
         due_date = request.POST.get('due-date')
