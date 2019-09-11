@@ -2,16 +2,27 @@
 
 
 {% block title %}
-  인덱스
+모아보기
 {% endblock title %}
-  
-{% block body %}
-<h1>인덱스</h1>
-{% for todo in todos  %}
-<li>{{ todo.title }} : {{ todo.due_date }} 
-  <a href="{% url 'todos:update' todo.id %}">수정</a>
-  <a href="{% url 'todos:delete' todo.id %}">삭제</a>
-</li>
 
+{% block body %}
+
+{% for todo in todos  %}
+<p>
+  
+  <a class="btn btn-primary" data-toggle="collapse" href="#multiCollapseExample{{ todo.id }}" role="button"
+    aria-expanded="false" aria-controls="multiCollapseExample1">{{ todo.title }} : {{ todo.due_date }}</a>
+</p>
+<div class="row">
+  <div class="col">
+    <div class="collapse multi-collapse" id="multiCollapseExample{{ todo.id }}">
+      <div class="card card-body">
+        하긴 하는거임?
+        <a href="{% url 'todos:update' todo.id %}">수정</a>
+        <a href="{% url 'todos:delete' todo.id %}">삭제</a>
+      </div>
+    </div>
+  </div>
+</div>
 {% endfor %}
 {% endblock %}
