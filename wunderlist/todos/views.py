@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Todo
-from telegram import sendMessage
+from .telegram import sendMessage
 # Create your views here.
 def index(request):
     todos = Todo.objects.all()
