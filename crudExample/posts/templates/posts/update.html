@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="container">
+  <h1>수정하기</h1>
+
+  <form action="{% url 'posts:update' post.id %}" method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="title">제목</label>
+      <input type="text" value="{{ post.title }}" class="form-control" id="title" name="title" placeholder="제목을 입력해 주세요.">
+      <label for="content">내용</label>
+      <textarea id="content" name="content" class="form-control" rows="10">{{ post.content }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">수정하기</button>
+  </form>
+    
+</div>
+
+{% endblock %}

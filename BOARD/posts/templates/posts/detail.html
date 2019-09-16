@@ -1,0 +1,14 @@
+{% extends 'posts/base.html' %}
+
+{% block body %}
+<a href="/posts/create/">글 작성하기</a>
+<a href="/posts/index/">글 모아보기</a>
+
+<h1>{{ post.title }}</h1>
+<h1>{{ post.content }}</h1>
+<h1>{{ post.created_at }}</h1>
+<h1>{{ post.updated_at }}</h1>
+
+<a href="{% url 'posts:update' post.id %}">글 수정하기</a>
+
+{% endblock%}

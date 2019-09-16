@@ -1,4 +1,4 @@
-"""wunderlist URL Configuration
+"""board URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.2/topics/http/urls/
@@ -15,13 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from decouple import config
-from todos import views
-
-token = config('TOKEN')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('todos/', include('todos.urls')),
-    path(f'{token}/', views.telegram)
+    path('posts/', include('posts.urls')),
 ]

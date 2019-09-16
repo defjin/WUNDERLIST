@@ -1,0 +1,12 @@
+{% extends 'posts/base.html' %}
+
+{% block body %}
+<a href="/posts/create/">글 작성하기</a>
+<a href="/posts/index/">글 모아보기</a>
+
+{% for post in posts %}
+<li>
+  <a href="{% url 'posts:detail' post.id %}">{{ post.title }}</a>
+</li>
+{% endfor %}
+{% endblock %}

@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from .models import Todo
 from .telegram import sendMessage
 # Create your views here.
@@ -39,7 +39,22 @@ def update(request, pk):
         }
         return render(request, 'todos/update.html', ctx)
 
-def delete(reqeust, pk):
+def delete(request, pk):
     todo = get_object_or_404(Todo, id=pk)
     todo.delete()
     return redirect('todos:index')
+
+def telegram(request):
+    print(request.method)
+    print(request)
+    res = request.get_json() 
+    text = res.get('message').get('text')
+    chat_id = res.get('message').get("chat").get("id")
+    base = "https://api.telegram.org"
+    method = "setWebhook"
+    token = 'bot945387076:AAFFIwIUMDhmxDSn-0-cHrF8He14WpKFlLQ'
+    forwarding = "https://16747f7e.ngrok.io"
+    string = f'{base}/bot{token}/{method}?url={forwarding}/{token}'
+    
+    return HttpResponse(200)
+    
