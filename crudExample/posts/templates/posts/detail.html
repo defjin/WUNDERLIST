@@ -6,7 +6,11 @@
   <a href="/posts/{{ post.id }}/delete/" class="btn btn-danger">삭제</a>
   <h1>{{ post.title }}</h1>
   <p>{{ post.content }}</p>
-  <img src="{{ post.image_url }}" alt="">
+  {% if post.image %}
+    <img src="{{ post.image.url }}" alt="{{ post.image }}">
+  {% else %}
+    <img src="/media/no_image.jpg" alt="no_image">
+  {% endif%}
   <p>{{ post.created_at }}</p>
   <p>{{ post.updated_at }}</p>
   <hr>
@@ -16,9 +20,19 @@
     <input type="submit">
   </form>
   <hr>
+  <!-- {{ comments.count }} --> 
+  <!-- 성능상 아래 코드가 더 좋음 -->
+  {% if comments %}
+  <p><i>{{ comments | length}}개의 댓글이 있습니다.</i></p>
+  {% else %}
+  <p><i>아직 댓글이 없습니다. 댓글을 달아주세요</i></p>
+  {% endif %}
+
+  
   {% for comment in comments %}
     <p>{{ comment.content }}</p>
   {% endfor %}
+  <!-- { empty } for문이 없을 경우 -->
 </div>
 
 {% endblock %}

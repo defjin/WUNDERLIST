@@ -15,7 +15,8 @@ def create(request):
     if request.method == 'POST':
         Post.objects.create(
             title = request.POST.get('title'), 
-            content = request.POST.get('content'), 
+            content = request.POST.get('content'),
+            image = request.FILES.get('image'),
         )
         return redirect('home')
     else:
@@ -49,7 +50,7 @@ def update(request, pk):
         post = Post.objects.get(pk=pk)
         post.title = request.POST.get('title')
         post.content = request.POST.get('content')
-        post.image_url = request.POST.get('image_url')
+        post.image = request.FILES.get('image')
         post.save()
 
         return redirect('posts:detail', pk)
