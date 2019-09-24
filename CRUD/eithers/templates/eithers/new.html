@@ -1,0 +1,13 @@
+{% extends 'eithers/base.html' %}
+
+{% block body %}
+<form action="{% url 'eithers:create' %}" method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  <p><input type="text" name="title"></p>
+  <p><input type="text" name="issue_a">
+    <input type="file" name="image_a"></p>
+  <p><input type="text" name="issue_b">
+    <input type="file" name="image_b"></p>
+  <input type="submit">
+</form>
+{% endblock %}
