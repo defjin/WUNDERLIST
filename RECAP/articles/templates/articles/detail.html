@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block body %}
+  <h1>상세페이지</h1>
+  <p>번호 : {{ article.pk }}</p>
+  <p>제목 : {{ article.title }}</p>
+  <p>내용 : {{ article.content }}</p>
+  <p>생성일자 : {{ article.created_at|date:'M-d-Y' }}</p>
+  <p>수정일자 : {{ article.updated_at|date:"SHORT_DATE_FORMAT" }}</p>
+  <a href="{% url 'articles:index' %}">목록보기</a>
+{% endblock %}
