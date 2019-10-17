@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404, Http404
 from .models import Article
-from .forms import ArticleForm
+from .forms import ArticleForm, CommentForm
 from IPython import embed
 # django.http import Http404
 from django.views.decorators.http import require_http_methods, require_POST
@@ -13,15 +13,17 @@ def index(request):
     return render(request, 'articles/index.html', ctx)
 
 def detail(request, article_pk):
-    #article = get_object_or_404(Article, pk=article_pk)
+    article = get_object_or_404(Article, pk=article_pk)
     # 만약 Article에서 pk를 찾았을 때 error가 나오면 error handling 하기
-    try:
-        article = Article.objects.get(pk=article_pk)
-    except Article.DoesNotExist:
-        raise Http404('어딜 가니? 해당하는 id의 글이 없잖아')
-
+    # try:
+    #     article = Article.objects.get(pk=article_pk)
+    # except Article.DoesNotExist:
+    #     raise Http404('어딜 가니? 해당하는 id의 글이 없잖아')
+    comment_form = CommentForm()
     ctx = {
         'article': article,
+        'comment_form': comment_form,
+        'comments': article.comment_set.all(),
     }
     return render(request, 'articles/detail.html', ctx)
 
@@ -109,3 +111,29 @@ def delete(request, article_pk):
 # -POST /articles/:id/comments
 # -POST /articles/:id/comments_delete/:c_id
 # modelform 사용하기
+def create_comment(request, article_pk):
+    article = Article.objects.get(pk=article_pk)
+    if request.method == 'POST':
+        comment_form = CommentForm(request.POST)
+
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            # commit : database commit, 실제 db에 저장한다 
+            #embed()
+            # comment.article : 객체를 리턴함
+            # 1번
+            #comment.article_id = article_pk
+            #comment.save()
+            # return redirect('articles:detail',article_pk)
+            # 2번
+            comment.article = article
+            comment.save()
+        return redirect(article)
+
+            
+            
+
+        
+
+
+    return render(request, 'articles/update.html', ctx)

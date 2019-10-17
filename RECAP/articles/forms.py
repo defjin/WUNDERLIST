@@ -1,5 +1,5 @@
 from django import forms
-from .models import Article
+from .models import Article, Comment
 # models.py의 구조와 비슷함
 
 # class ArticleForm(forms.Form):
@@ -70,3 +70,9 @@ class ArticleForm(forms.ModelForm):
         # }
     # 만들어주는 폼 스타일의 양식은 기본적으로 model의 field name에 해당됨
     ################
+
+class CommentForm(forms.ModelForm):
+    #models.py에서 연동한 article 클래스는 자동으로 찾아준다.
+    class Meta:
+        model = Comment
+        fields = ('content',)

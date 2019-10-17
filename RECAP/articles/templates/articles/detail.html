@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load bootstrap4 %}
 
 {% block body %}
   <h1>상세페이지</h1>
@@ -13,4 +14,16 @@
     <input type="submit" value="삭제하기">
   </form>
   <a href="{% url 'articles:update' article.pk %}">수정하기</a>
+
+  <form action="{% url 'articles:create_comment' article.pk %}" method="POST">
+    {% csrf_token %}
+    {% bootstrap_form comment_form %}
+    <input type="submit">
+  </form>
+  <hr>
+  <h2>댓글목록</h2>
+  {% for comment in comments %}
+  <p>{{ comment.content }} </p>
+  {% endfor %}
+  
 {% endblock %}
