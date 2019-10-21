@@ -2,7 +2,9 @@
 
 {% block body %}
 <h1 id="title">Articles</h1>
-<a href="{% url 'articles:create' %}">새글쓰기</a>
+{% if user.is_authenticated %}
+  <a href="{% url 'articles:create' %}">새글쓰기</a>
+{% endif %}
 
 <!-- 모든 Article 들을 보여줌 -->
 {% for article in articles %}

@@ -1,9 +1,10 @@
-from django.shortcuts import render, redirect, get_object_or_404, Http404
+from django.shortcuts import render, redirect, get_object_or_404, Http404, HttpResponse
 from .models import Article
 from .forms import ArticleForm, CommentForm
 from IPython import embed
 # django.http import Http404
 from django.views.decorators.http import require_http_methods, require_POST
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def index(request):
@@ -27,8 +28,10 @@ def detail(request, article_pk):
     }
     return render(request, 'articles/detail.html', ctx)
 
-
+@login_required
 def create(request):
+    if not request.user.is_authenticated:
+        return redirect('accounts:login')
     # GET/POST
     if request.method == 'POST':
         # title = request.POST.get('title')
@@ -39,7 +42,7 @@ def create(request):
         # )
         form = ArticleForm(request.POST)
         #is_valid : 제대로된 요청이 아니면 무시해버린다
-        embed()
+        #embed()
         if form.is_valid():
             #title = form.cleaned_data.get('title')
             #content = form.cleaned_data.get('content')
@@ -58,6 +61,7 @@ def create(request):
         return render(request, 'articles/create.html', ctx)
 
 # update -> articles/:id/update |  (put) articles/:id
+@login_required
 def update(request, article_pk):
     article = get_object_or_404(Article, pk=article_pk)
     if request.method == 'POST':
@@ -93,17 +97,21 @@ def update(request, article_pk):
 # view decorator  : http405 error : allowed http methods 관련된 양식 
 # 잘못된 접근입니다 !!
 @require_POST
+@login_required
 def delete(request, article_pk):
-    # 기본적인 get 형태 - url이 노출되어서 삭제의 위험이 있음
-    #article = get_object_or_404(Article, pk=article_pk)
-    #article.delete()
-    # POST - 수정이나 삭제는 반드시 post로
-    article = get_object_or_404(Article, pk=article_pk)
-    if request.method == 'POST':
-        article.delete()
-        return redirect('articles:index')
+    if request.user.is_authenticated:
+        # 기본적인 get 형태 - url이 노출되어서 삭제의 위험이 있음
+        #article = get_object_or_404(Article, pk=article_pk)
+        #article.delete()
+        # POST - 수정이나 삭제는 반드시 post로
+        article = get_object_or_404(Article, pk=article_pk)
+        if request.method == 'POST':
+            article.delete()
+            return redirect('articles:index')
+        else:
+            return redirect(article)
     else:
-        return redirect(article)
+        return HttpResponse('승인되지 않았습니다', status=401)
 
 
 ##### TODO
@@ -111,6 +119,7 @@ def delete(request, article_pk):
 # -POST /articles/:id/comments
 # -POST /articles/:id/comments_delete/:c_id
 # modelform 사용하기
+@login_required
 def create_comment(request, article_pk):
     article = Article.objects.get(pk=article_pk)
     if request.method == 'POST':
@@ -128,7 +137,7 @@ def create_comment(request, article_pk):
             # 2번
             comment.article = article
             comment.save()
-        return redirect(article)
+    return redirect(article)
 
             
             
@@ -136,4 +145,4 @@ def create_comment(request, article_pk):
         
 
 
-    return render(request, 'articles/update.html', ctx)
+    
