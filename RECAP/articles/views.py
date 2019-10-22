@@ -8,8 +8,13 @@ from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def index(request):
+    visits_num = request.session.get('visits', 0)
+    request.session['visits'] = visits_num + 1
+    request.session.modified = True
+    #embed()
     ctx = {
         'articles': Article.objects.all(),
+        'visits': visits_num
     }
     return render(request, 'articles/index.html', ctx)
 
@@ -47,7 +52,9 @@ def create(request):
             #title = form.cleaned_data.get('title')
             #content = form.cleaned_data.get('content')
             #new_article = Article.objects.create(title=title, content=content)
-            new_article = form.save()
+            new_article = form.save(commit=False)
+            new_article.user = request.user
+            new_article.save()
             # 전송된 데이터의 유효성 검사
             # redirect : 객체가 들어왔을 때는 get_absolute_url이 있는지를 살펴보고 그대로 수행한다.
             return redirect(new_article)
@@ -64,17 +71,18 @@ def create(request):
 @login_required
 def update(request, article_pk):
     article = get_object_or_404(Article, pk=article_pk)
-    if request.method == 'POST':
-        #실제 DB의 데이터를 수정
-        form = ArticleForm(request.POST, instance=article) # 인자가 하나면 modelform에서는 create로 인식하게 됨
-        if form.is_valid():
-            # form을 사용할 때
-            # article.title = form.cleaned_data.get('title')
-            # article.content = form.cleaned_data.get('content')
-            # article.save()
-            # modelform을 사용할 때
-            article = form.save() #이거 하게 되면 데이터가 계속 새로 생성되어서 추가됨
-            return redirect(article)
+    if article_pk == request.user:
+        if request.method == 'POST':
+            #실제 DB의 데이터를 수정
+            form = ArticleForm(request.POST, instance=article) # 인자가 하나면 modelform에서는 create로 인식하게 됨
+            if form.is_valid():
+                # form을 사용할 때
+                # article.title = form.cleaned_data.get('title')
+                # article.content = form.cleaned_data.get('content')
+                # article.save()
+                # modelform을 사용할 때
+                article = form.save() #이거 하게 되면 데이터가 계속 새로 생성되어서 추가됨
+                return redirect(article)
     
     # 편집화면
     # form
@@ -84,6 +92,8 @@ def update(request, article_pk):
     #         'content' : article.content,
     # })
     #model form
+    else:
+        return redirect('articles:index')
     form = ArticleForm(instance=article)
     ctx = {
         'article': article,
@@ -97,7 +107,6 @@ def update(request, article_pk):
 # view decorator  : http405 error : allowed http methods 관련된 양식 
 # 잘못된 접근입니다 !!
 @require_POST
-@login_required
 def delete(request, article_pk):
     if request.user.is_authenticated:
         # 기본적인 get 형태 - url이 노출되어서 삭제의 위험이 있음
@@ -105,11 +114,13 @@ def delete(request, article_pk):
         #article.delete()
         # POST - 수정이나 삭제는 반드시 post로
         article = get_object_or_404(Article, pk=article_pk)
-        if request.method == 'POST':
-            article.delete()
-            return redirect('articles:index')
+        if article.user == request.user:
+            if request.method == 'POST':
+                article.delete()
+                return redirect('articles:index')
         else:
             return redirect(article)
+        
     else:
         return HttpResponse('승인되지 않았습니다', status=401)
 
@@ -136,13 +147,22 @@ def create_comment(request, article_pk):
             # return redirect('articles:detail',article_pk)
             # 2번
             comment.article = article
+            comment.user = request.user
             comment.save()
     return redirect(article)
 
-            
-            
+def send_cookie(request):
+    res = HttpResponse('과자받아라')
+    res.set_cookie('my_cookie', 'oreo')
+    return res
 
-        
-
-
+def like(request, article_pk):
+    # article_pk로 넘어온 글에 현재 접속중인 user는 추가한다.
     
+    article = Article.objects.get(pk=article_pk)
+    #request.user.like_articles.add(article)
+    if request.user in article.like_users.all():
+        article.like_users.remove(request.user)
+    else:
+        article.like_users.add(request.user)
+    return redirect(article)

@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm, PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from IPython import embed
 from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from .forms import CustomUserChangeForm
 
 # Create your views here.
 def signup(request):
@@ -20,7 +23,7 @@ def signup(request):
     ctx = {
         'form':form,
     }
-    return render(request, 'accounts/signup.html',ctx)
+    return render(request, 'accounts/auth_form.html',ctx)
 
 # rud는 모두 로그인이 된 이후에 진행해야한다.
 
@@ -47,7 +50,7 @@ def login(request):
     ctx = {
         'form':form,
     }
-    return render(request, 'accounts/login.html',ctx)    
+    return render(request, 'accounts/auth_form.html',ctx)    
 
 def logout(request):
     auth_logout(request)
@@ -59,4 +62,40 @@ def delete(request):
     # DB에서 유저 삭제
     request.user.delete()
     return redirect('articles:index')
-    
+
+@login_required
+def update(request):
+    #회원정보 수정 로직
+    if request.method == 'POST':
+        # 실제db
+        form = CustomUserChangeForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+        return redirect('articles:index')
+    else:
+        # 편집화면
+        form = CustomUserChangeForm(instance=request.user)
+        #폼을 맞춰서 수정하자.
+        ctx = {
+            'form':form,
+        }
+        return render(request, 'accounts/auth_form.html',ctx)
+
+@login_required
+def change_password(request):
+    #비밀번호 수정은 독립되어 있음 
+    if request.method == 'POST':
+        # 실제 비번 변경
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, form.user)
+        return redirect('articles:index')
+    else:
+        # 편집화면
+        form = PasswordChangeForm(request.user)
+        #폼을 맞춰서 수정하자.
+        ctx = {
+            'form':form,
+        }
+        return render(request, 'accounts/auth_form.html', ctx)

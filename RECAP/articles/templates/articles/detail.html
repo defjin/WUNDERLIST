@@ -6,27 +6,35 @@
   <p>번호 : {{ article.pk }}</p>
   <p>제목 : {{ article.title }}</p>
   <p>내용 : {{ article.content }}</p>
+  <p>작성자 : {{ article.user }}</p>
   <p>생성일자 : {{ article.created_at|date:'M-d-Y' }}</p>
   <p>수정일자 : {{ article.updated_at|date:"SHORT_DATE_FORMAT" }}</p>
   <a href="{% url 'articles:index' %}">목록보기</a>
-  {% if user.is_authenticated %}
+  {% if article.user == request.user %}
   <form action="{% url 'articles:delete' article.pk %}" method="POST">
     {% csrf_token %}
     <input type="submit" value="삭제하기">
   </form>
   <a href="{% url 'articles:update' article.pk %}">수정하기</a>
-  
+  {% endif %}
+
+  {% if user.is_authenticated %}
   <form action="{% url 'articles:create_comment' article.pk %}" method="POST">
     {% csrf_token %}
     {% bootstrap_form comment_form %}
     <input type="submit">
   </form>
   {% endif %}
+  <hr>
+  <h2>좋아요 목록 </h2>
+  <p>좋아요 : {{ article.like_users.count  }}</p>
+  <p>좋아요 목록 : {% for u in article.like_users.all %}{{ u }}{% endfor %}</p>
+  <a href="{% url 'articles:like' article.pk %}">좋아요!</a>
   
   <hr>
   <h2>댓글목록</h2>
   {% for comment in comments %}
-  <p>{{ comment.content }} </p>
+  <p>{{ comment.user }}님의 댓글 : {{ comment.content }} </p>
   {% endfor %}
   
 {% endblock %}

@@ -13,10 +13,11 @@
 <body>
   {% if user.is_authenticated %}
   <p>현재 접속된 유저 : {{ user.username }}</p>
-  <a href="{% url 'accounts:logout' %}">로그아웃</a>
+  <a class="btn btn-danger" href="{% url 'accounts:logout' %}">로그아웃</a>
+  <a class="btn btn-success" href="{% url 'accounts:update' %}">회원정보수정</a>
   <form action="{% url 'accounts:delete' %}" method="POST">
     {% csrf_token %}
-    <input type="submit" value="회원탈퇴" class="btn btn-danger">
+    <input type="submit" value="회원탈퇴" class="btn btn-secondary">
   </form>
   {% else %}
   <a href="{% url 'accounts:signup' %}">회원가입</a>
