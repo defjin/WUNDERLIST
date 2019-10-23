@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<h1> 태그모음 </h1>
+
+{% for tag in tags %}
+  <a href="{% url 'articles:hashtag' tag.pk %}">{{ tag.content }}</a>
+{% endfor %}
+
+
+
+{% endblock %}

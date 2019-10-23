@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block body%}
+{% for article in articles %}
+  <p>{{ article.title }}</p>
+  <p>{{ article.user }}</p>
+  <a href="{% url 'articles:detail' article.pk %}">상세보기</a>
+{% endfor %}
+{% endblock %}

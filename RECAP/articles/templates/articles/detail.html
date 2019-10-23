@@ -26,10 +26,25 @@
   </form>
   {% endif %}
   <hr>
+  <h2>해시태그 목록</h2>
+    <p><strong>
+      해시태그 : {% for tag in article.hashtags.all%} {{ tag.content }} {% endfor %}
+    </strong></p>
+  <hr>
   <h2>좋아요 목록 </h2>
   <p>좋아요 : {{ article.like_users.count  }}</p>
-  <p>좋아요 목록 : {% for u in article.like_users.all %}{{ u }}{% endfor %}</p>
-  <a href="{% url 'articles:like' article.pk %}">좋아요!</a>
+  {% with likers=article.like_users.all %}
+    <p>좋아요 목록 : 
+      {% for u in likers %}
+        {{ u }}
+      {% endfor %}
+    </p>
+    {% if user in likers %}
+      <a href="{% url 'articles:like' article.pk %}">좋아요 취소</a>
+    {% else %}
+      <a href="{% url 'articles:like' article.pk %}">좋아요!</a>
+    {% endif %}
+  {% endwith %}
   
   <hr>
   <h2>댓글목록</h2>

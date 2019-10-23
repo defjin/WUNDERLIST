@@ -1,19 +1,29 @@
 from django.shortcuts import render, redirect, get_object_or_404, Http404, HttpResponse
-from .models import Article
+from .models import Article, Hashtag
 from .forms import ArticleForm, CommentForm
 from IPython import embed
 # django.http import Http404
 from django.views.decorators.http import require_http_methods, require_POST
 from django.contrib.auth.decorators import login_required
+from itertools import chain
+from django.db.models import Q
 
 # Create your views here.
+@login_required
 def index(request):
     visits_num = request.session.get('visits', 0)
     request.session['visits'] = visits_num + 1
     request.session.modified = True
     #embed()
+    # 나를 포함시키는 방법 #1
+    followings = request.user.followings.all()
+    followings_and_me = chain(followings, [request.user])
+    followingArticles = Article.objects.filter(user__in=followings_and_me)
+    #2 models.Q를 이용하는 법
+
+    # filter in operator # 찾고자하는필드__in
     ctx = {
-        'articles': Article.objects.all(),
+        'articles': followingArticles,
         'visits': visits_num
     }
     return render(request, 'articles/index.html', ctx)
@@ -55,8 +65,17 @@ def create(request):
             new_article = form.save(commit=False)
             new_article.user = request.user
             new_article.save()
+
             # 전송된 데이터의 유효성 검사
             # redirect : 객체가 들어왔을 때는 get_absolute_url이 있는지를 살펴보고 그대로 수행한다.
+
+            # hashtag 
+            for word in new_article.content.split():
+                if word.startswith('#'):
+                    hashtag, created = Hashtag.objects.get_or_create(content=word)
+                    new_article.hashtags.add(hashtag)
+
+            
             return redirect(new_article)
         else:
             return redirect('articles:create')
@@ -160,9 +179,35 @@ def like(request, article_pk):
     # article_pk로 넘어온 글에 현재 접속중인 user는 추가한다.
     
     article = Article.objects.get(pk=article_pk)
+    user = request.user
     #request.user.like_articles.add(article)
-    if request.user in article.like_users.all():
-        article.like_users.remove(request.user)
+    #if request.user in article.like_users.all(): (1)
+    if article.like_users.filter(pk=user.pk).exists(): #(2)
+        article.like_users.remove(user)
     else:
-        article.like_users.add(request.user)
+        article.like_users.add(user)
     return redirect(article)
+
+def explore(request):
+    articles = Article.objects.all()
+    ctx = {
+        'articles': articles,
+    }
+    return render(request, 'articles/explore.html',ctx)
+
+def tags(request):
+    tags = Hashtag.objects.all()
+    ctx = {
+        'tags':tags,
+    }
+    return render(request, 'articles/tags.html', ctx)
+
+def hashtag(request, hashtag_pk):
+    hashtag = get_object_or_404(Hashtag, pk=hashtag_pk)
+    # related_name 을 정의하지 않더라도 자동으로 xx_set으로 정의된다.
+    articles = hashtag.article_set.all()
+    ctx = {
+        'hashtag' : hashtag,
+        'articles': articles,
+    }
+    return render(request, 'articles/hashtag.html', ctx)
