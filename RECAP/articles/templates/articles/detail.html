@@ -32,17 +32,17 @@
     </strong></p>
   <hr>
   <h2>좋아요 목록 </h2>
-  <p>좋아요 : {{ article.like_users.count  }}</p>
+  <p>좋아요 : <span id='like-counter'>{{ article.like_users.count }}</span></p>
   {% with likers=article.like_users.all %}
-    <p>좋아요 목록 : 
+    <!-- <p>좋아요 목록 : 
       {% for u in likers %}
         {{ u }}
       {% endfor %}
-    </p>
-    {% if user in likers %}
-      <a href="{% url 'articles:like' article.pk %}">좋아요 취소</a>
+    </p> -->
+    {% if user in article.like_users.all %}
+      <button data-name='john' data-id="{{ article.pk }}" class="btn btn-outline-primary" id='like-button'>좋아요 취소</button>
     {% else %}
-      <a href="{% url 'articles:like' article.pk %}">좋아요!</a>
+      <button data-name='john' data-id="{{ article.pk }}" class="btn btn-primary" id='like-button'>좋아요</button>
     {% endif %}
   {% endwith %}
   
@@ -51,5 +51,31 @@
   {% for comment in comments %}
   <p>{{ comment.user }}님의 댓글 : {{ comment.content }} </p>
   {% endfor %}
-  
+  <script>
+    //좋아요 버튼 클릭 -> 좋아요 DB 업데이트하고 버튼을 바꿔줌
+    const likeButton = document.querySelector('#like-button')
+    likeButton.addEventListener('click', function(e){
+      // 좋아요 DB 업데이트 === articles/:id/like 요청을 보냄
+      const articleID = e.target.dataset.id
+      axios.get(`/articles/${articleID}/like`)
+          .then(res => {
+            // 버튼을 좋아요 취소로/좋아요로
+            if (res.data.liked === true){
+              console.log(res.data)
+              e.target.classList.remove('btn-primary')
+              e.target.classList.add('btn-outline-primary')
+              e.target.innerText = '좋아요취소'
+            }
+            else{
+              e.target.classList.remove('btn-outline-primary')
+              e.target.classList.add('btn-primary')
+              e.target.innerText = '좋아요'
+            }
+
+            const counterSpan = document.querySelector('#like-counter')
+            counterSpan.textContent = res.data.count
+          })
+      })
+    
+  </script>
 {% endblock %}

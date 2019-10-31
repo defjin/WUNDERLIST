@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404, Http404, HttpR
 from .models import Article, Hashtag
 from .forms import ArticleForm, CommentForm
 from IPython import embed
-# django.http import Http404
+from django.http import Http404, JsonResponse
 from django.views.decorators.http import require_http_methods, require_POST
 from django.contrib.auth.decorators import login_required
 from itertools import chain
@@ -176,17 +176,34 @@ def send_cookie(request):
     return res
 
 def like(request, article_pk):
-    # article_pk로 넘어온 글에 현재 접속중인 user는 추가한다.
+    # django only version
+    # # article_pk로 넘어온 글에 현재 접속중인 user는 추가한다.
     
+    # article = Article.objects.get(pk=article_pk)
+    # user = request.user
+    # #request.user.like_articles.add(article)
+    # #if request.user in article.like_users.all(): (1)
+    # if article.like_users.filter(pk=user.pk).exists(): #(2)
+    #     article.like_users.remove(user)
+    # else:
+    #     article.like_users.add(user)
+    # return redirect(article)
+
+    # django with js version
     article = Article.objects.get(pk=article_pk)
     user = request.user
-    #request.user.like_articles.add(article)
-    #if request.user in article.like_users.all(): (1)
     if article.like_users.filter(pk=user.pk).exists(): #(2)
         article.like_users.remove(user)
+        liked = False
     else:
         article.like_users.add(user)
-    return redirect(article)
+        liked = True
+
+    context = { 
+        'liked' : liked,
+        'count' : article.like_users.count()
+        }
+    return JsonResponse(context)
 
 def explore(request):
     articles = Article.objects.all()
