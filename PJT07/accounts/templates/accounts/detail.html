@@ -1,4 +1,43 @@
 {% extends 'base.html' %}
+
 {% block body %}
-    
+<h1>{{ person }}</h1>
+{% with followers=person.followers.all followings=person.followings.all %}
+  {% if user != person %}
+    {% if user in followers %}
+      <a class="btn btn-outline-primary" href="{% url 'accounts:follow' person.pk %}">언팔로우</a>
+    {% else %}
+      <a class="btn btn-primary" href="{% url 'accounts:follow' person.pk %}">팔로우</a>
+    {% endif %}
+  {% endif %}
+  <p>팔로워수 : {{ followers | length }} </p>
+  <p>
+    팔로워 : 
+    {% for follower in followers %} 
+      {{ follower }}
+    {% endfor %}
+  </p>
+  <p>팔로잉수 : {{ person.followings.count }}</p>
+  <p>
+    팔로잉 : 
+    {% for following in followings %} 
+      {{ following }}
+    {% endfor %}
+  </p>
+{% endwith %}
+<hr>
+<h2> {{ person }}가 쓴 리뷰</h2>
+{% with reviews=person.review_set.all %}
+  {% for review in reviews %}
+  <p>
+    내용 : {{ review.content }} | 
+    점수 : {{ review.score }} |
+  </p>
+  {% endfor %}
+{% endwith %}
+
+<h2> {{ person }}가 좋아하는 영화</h2>
+  {% for movie in person.like_movies.all %}
+    {{ movie.title }}
+  {% endfor %}
 {% endblock %}

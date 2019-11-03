@@ -4,6 +4,7 @@ from .forms import CustomUserCreationForm
 from django.contrib.auth import get_user_model
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def index(request):
@@ -14,9 +15,14 @@ def index(request):
     return render(request, 'accounts/index.html', context)
 
 def detail(request, account_pk):
-    account = get_object_or_404(get_user_model(), pk=account_pk)
+    person = get_object_or_404(get_user_model(), pk=account_pk)
+    make_reviews  = person.review_set.all()
+    movies = person.like_movies.all()
+
     context = {
-        'account': account,
+        'person': person,
+        'make_reviews' : make_reviews,
+        'movies' : movies,
     }
     return render(request, 'accounts/detail.html', context)
 
@@ -47,6 +53,23 @@ def login(request):
     }
     return render(request, 'accounts/auth_form.html', context)
 
+@login_required
 def logout(request):
     auth_logout(request)
     return redirect('accounts:index')
+
+@login_required
+def follow(request, person_pk):
+    person = get_object_or_404(get_user_model(), pk=person_pk)
+    user = request.user
+
+    if person.followers.filter(pk=user.pk).exists():
+        person.followers.remove(user)
+    else:
+        #자기자신 follow 막기
+        person.followers.add(user)
+    return redirect('accounts:detail', person_pk)
+
+
+
+
