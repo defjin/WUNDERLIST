@@ -2,8 +2,8 @@
 
 {% block body %}
 
-{% for user in users %}
-  <a href="{% url 'accounts:detail' user.pk %}">{{ user.username }}</a>
+{% for person in persons %}
+  <p><a href="{% url 'accounts:detail' person.pk %}">{{ person.username }}</a></p>
 
 {% endfor %}
 
