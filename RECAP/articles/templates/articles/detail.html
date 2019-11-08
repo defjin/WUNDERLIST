@@ -57,7 +57,9 @@
     likeButton.addEventListener('click', function(e){
       // 좋아요 DB 업데이트 === articles/:id/like 요청을 보냄
       const articleID = e.target.dataset.id
-      axios.get(`/articles/${articleID}/like`)
+      axios.defaults.xsrfCookieName = 'csrftoken'
+      axios.defaults.xsrfHeaderName = 'X-CSRFToken'
+      axios.post(`/articles/${articleID}/like/`)
           .then(res => {
             // 버튼을 좋아요 취소로/좋아요로
             if (res.data.liked === true){
